@@ -15,5 +15,3 @@
         public int fCost => gCost + hCost;
     }
 }
-
-

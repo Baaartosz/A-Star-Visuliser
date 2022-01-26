@@ -18,6 +18,10 @@ namespace pathfinder
         private ToolSelect _toolSelect;
         private Button _clearButton;
 
+        private Finder _finder;
+        private Button _setup;
+        private Button _run;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -29,10 +33,21 @@ namespace pathfinder
         {
             // TODO: Add your initialization logic here
 
-            _grid = new Grid(40, 40, new Vector2(32, 55), 10);
+            _grid = new Grid(20, 20, new Vector2(32, 55), 20);
             _toolSelect = new ToolSelect(_grid);
             _clearButton = new Button("Clear", new Vector2(680, 55), Color.Red, 60, 25);
-            _clearButton.onClick += delegate { _grid.FillArray(0); };
+            _clearButton.onClick += delegate { 
+                _grid.FillArray(0);
+                _finder.Reset();
+            };
+            
+            
+            _finder = new Finder(_grid);
+            _setup = new Button("Setup", new Vector2(680, 90), Color.DarkOrange, 60, 25);
+            _setup.onClick += delegate { _finder.Setup(); };
+            
+            _run = new Button("Run", new Vector2(680, 120), Color.Green, 60, 25);
+            _run.onClick += delegate { _finder.iterate = !_finder.iterate; };
 
             base.Initialize();
         }
@@ -61,6 +76,10 @@ namespace pathfinder
             _grid.Update(gameTime);
             _toolSelect.Update(gameTime);
             _clearButton.Update(gameTime);
+            
+            _finder.Update(gameTime);
+            _setup.Update(gameTime);
+            _run.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -77,7 +96,12 @@ namespace pathfinder
             _toolSelect.Draw(_spriteBatch);
             _clearButton.Draw(_spriteBatch);
 
-            _spriteBatch.DrawString(pixelFont, $"Simple A* Pathfinder", new Vector2(32, 25), Color.White);
+            //finder
+            _finder.Draw(_spriteBatch);
+            _setup.Draw(_spriteBatch);
+            _run.Draw(_spriteBatch);
+
+            _spriteBatch.DrawString(gameplayFont, $"A* Pathfinder", new Vector2(32, 20), Color.White);
             _spriteBatch.End();
 
             base.Draw(gameTime);

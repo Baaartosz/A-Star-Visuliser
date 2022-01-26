@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -51,7 +52,7 @@ namespace pathfinder
             m_cells[GetIndex(x, y)] = value;
         }
 
-        private int GetCellValue(int x, int y)
+        public int GetCellValue(int x, int y)
         {
             return m_cells[GetIndex(x, y)];
         }
@@ -67,6 +68,17 @@ namespace pathfinder
 
             return x + y * m_sizeX;
         }
+       
+        public void GetXY(int index, out int x, out int y)
+        {
+            // get x , y from index
+            //x = i % width;    // % is the "modulo operator", the remainder of i / width;
+            //y = i / width;    // where "/" is an integer division
+            x = index % m_sizeX;
+            y = index / m_sizeX;
+        }
+
+        public int GetArraySize() => m_sizeX * m_sizeY;
 
         // Only code that should be modifying the grid directly is mouse, but pathfinder will be editing it to
         // so this code will be used then. Remove this comment if it happens.
@@ -103,12 +115,13 @@ namespace pathfinder
                 var cellColor = GetCellValue(x, y) switch
                 {
                     0 => Color.Black, // Empty
-                    1 => Color.MediumBlue, // Start
+                    1 => Color.MediumBlue, // Finder
                     2 => Color.Gold, // Goal
                     3 => Color.DarkGray, // Wall
                     // Other Non Assignable Colours
                     4 => Color.LimeGreen, // Open
                     5 => Color.Red, // Closed
+                    6 => Color.RoyalBlue, // Path
                     _ => Color.Purple // Error Default 
                 };
                 spriteBatch.Draw(Game1.PIXEL, r, cellColor);
@@ -135,12 +148,19 @@ namespace pathfinder
                     m_sizeX * m_cellSize, m_BORDER_THICKNESS), m_BORDER_COLOR);
         }
 
+        
+        
         public void Update(GameTime gameTime)
         {
             var ms = Mouse.GetState();
             if (ms.LeftButton == ButtonState.Pressed && WithinGridArea(ms))
             {
                 var currentMouseCellIndex = GetMouseOverIndex(ms.X - (int) m_position.X, ms.Y - (int) m_position.Y);
+                
+                int x, y;
+                GetXY(currentMouseCellIndex, out x, out y);
+                Console.WriteLine($"x{x} y{y}");
+                
                 switch (drawTool)
                 { // BUG index 0 is reset or does not allow placement initially.
                     case 1 when StartIndex != currentMouseCellIndex:
@@ -163,5 +183,8 @@ namespace pathfinder
 
 
         public void SetTool(int tool) => drawTool = tool;
+
+        public void GetStartLocation(out int x, out int y) => GetXY(StartIndex, out x, out y);
+        public void GetGoalLocation(out int x, out int y) => GetXY(GoalIndex, out x, out y);
     }
 }
