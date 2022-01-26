@@ -11,43 +11,28 @@ namespace pathfinder
         public static Texture2D PIXEL;
         public static SpriteFont gameplayFont;
         public static SpriteFont pixelFont;
-        
+
         private GraphicsDeviceManager _graphics;
-        private readonly Grid _grid;
+        private Grid _grid;
         private SpriteBatch _spriteBatch;
-        private readonly ToolSelect _toolSelect;
-        private int selectedItem;
+        private ToolSelect _toolSelect;
+        private Button _clearButton;
 
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
-
-            _grid = new Grid(40, 40, new Vector2(32, 55), 10);
-            _toolSelect = new ToolSelect(_grid);
-            // _testBtn = new Button("<", new Vector2(450, 55), Color.Orange, 25, 25);
-            // _testBtn.onClick += TestBtnOnonClick;
-            // _testBtn2 = new Button(">", new Vector2(480, 55), Color.Orange, 25, 25);
-            // _testBtn2.onClick += TestBtn2OnonClick;
-
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-        }
-
-        private void TestBtnOnonClick(object? sender, EventArgs e)
-        {
-            Console.WriteLine(selectedItem);
-            selectedItem--;
-        }
-        
-        private void TestBtn2OnonClick(object? sender, EventArgs e)
-        {
-            Console.WriteLine(selectedItem);
-            selectedItem++;
         }
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
+            _grid = new Grid(40, 40, new Vector2(32, 55), 10);
+            _toolSelect = new ToolSelect(_grid);
+            _clearButton = new Button("Clear", new Vector2(680, 55), Color.Red, 60, 25);
+            _clearButton.onClick += delegate { _grid.FillArray(0); };
 
             base.Initialize();
         }
@@ -75,7 +60,8 @@ namespace pathfinder
 
             _grid.Update(gameTime);
             _toolSelect.Update(gameTime);
-            
+            _clearButton.Update(gameTime);
+
             base.Update(gameTime);
         }
 
@@ -89,7 +75,9 @@ namespace pathfinder
             _grid.Draw(_spriteBatch);
 
             _toolSelect.Draw(_spriteBatch);
-            _spriteBatch.DrawString(pixelFont, $"Simple A* Pathfinder {selectedItem}", new Vector2(32, 25), Color.White);
+            _clearButton.Draw(_spriteBatch);
+
+            _spriteBatch.DrawString(pixelFont, $"Simple A* Pathfinder", new Vector2(32, 25), Color.White);
             _spriteBatch.End();
 
             base.Draw(gameTime);

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Linq;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -9,7 +10,7 @@ namespace pathfinder
     public class Grid
     {
         private readonly Color m_BORDER_COLOR = Color.Gray;
-        private readonly int m_BORDER_THICKNESS = 2;
+        private readonly int m_BORDER_THICKNESS = 1;
         private readonly Color m_BACKGROUND_COLOR = Color.Gray;
         
         private readonly int[] m_cells;
@@ -17,6 +18,9 @@ namespace pathfinder
         private readonly Vector2 m_position;
         private readonly int m_sizeX;
         private readonly int m_sizeY;
+
+        private int StartIndex;
+        private int GoalIndex;
 
         private int drawTool;
 
@@ -65,7 +69,7 @@ namespace pathfinder
         }
 
         // Only code that should be modifying the grid directly is mouse, but pathfinder will be editing it to
-        // so this code will be used then. Remove is this happens.
+        // so this code will be used then. Remove this comment if it happens.
         public bool WithinArrayBounds(int x, int y)
         {
             // Inclusive Lower Bound
@@ -98,7 +102,7 @@ namespace pathfinder
                     m_cellSize, m_cellSize);
                 var cellColor = GetCellValue(x, y) switch
                 {
-                    0 => Color.Transparent, // Empty
+                    0 => Color.Black, // Empty
                     1 => Color.MediumBlue, // Start
                     2 => Color.Gold, // Goal
                     3 => Color.DarkGray, // Wall
@@ -134,14 +138,30 @@ namespace pathfinder
         public void Update(GameTime gameTime)
         {
             var ms = Mouse.GetState();
-            if (ms.LeftButton == ButtonState.Pressed &&
-                WithinGridArea(ms)) // could be made into a function takes in ms, value
-                SetCell(GetMouseOverIndex(ms.X - (int) m_position.X, ms.Y - (int) m_position.Y), drawTool);
+            if (ms.LeftButton == ButtonState.Pressed && WithinGridArea(ms))
+            {
+                var currentMouseCellIndex = GetMouseOverIndex(ms.X - (int) m_position.X, ms.Y - (int) m_position.Y);
+                switch (drawTool)
+                { // BUG index 0 is reset or does not allow placement initially.
+                    case 1 when StartIndex != currentMouseCellIndex:
+                        SetCell(StartIndex, 0); // Reset previous location
+                        StartIndex = currentMouseCellIndex; // Set new location into variable
+                        SetCell(StartIndex, drawTool); // Set new location on grid.
+                        break;
+                    case 2 when GoalIndex != currentMouseCellIndex:
+                        SetCell(GoalIndex, 0);
+                        GoalIndex = currentMouseCellIndex;
+                        SetCell(GoalIndex, drawTool);
+                        break;
+                    case 0:
+                    case 3:
+                        SetCell(currentMouseCellIndex, drawTool);
+                        break;
+                }
+            }
         }
 
-        public void SetTool(int tool)
-        {
-            drawTool = tool;
-        }
+
+        public void SetTool(int tool) => drawTool = tool;
     }
 }
